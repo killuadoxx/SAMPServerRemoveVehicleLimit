@@ -1,0 +1,32 @@
+name: Auto-Build Windows DLL
+
+on:
+  push:
+    branches: [ "**" ] # Работает вообще в любой ветке вашего форка
+  pull_request:
+
+jobs:
+  build-windows-dll:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Устанавливаем кросс-компилятор Windows (MinGW) прямо на сервер Linux
+    - name: Install Windows Cross-Compiler
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mingw-w64
+
+    # Запускаем сборку. Мы подменяем стандартный g++ на кросс-компилятор для Windows (.dll)
+    - name: Compile Windows DLL via Makefile
+      run: |
+        make GXX=i686-w64-mingw32-g++ g++=i686-w64-mingw32-g++
+
+    # Автоматически загружаем готовый файл в артефакты
+    - name: Upload DLL Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: DisableVehicleLimit-Windows
+        path: bin/DisableVehicleLimit.dll
