@@ -9,9 +9,14 @@ OBJECTS = main.o amxplugin.o
 all:
 	# Создаем папку bin на сервере
 	mkdir -p bin
-	# Используем правильный компилятор через $(GXX) с отключением строгой проверки типов
+	
+	# Автоматически заменяем линуксовый mman.h на windows.h прямо в файле main.h
+	sed -i 's|<sys/mman.h>|<windows.h>|g' src/main.h
+	
+	# Компилируем C++ код
 	$(GXX) $(COMPILE_FLAGS) -fpermissive src/main.cpp -o main.o
 	$(GXX) $(COMPILE_FLAGS) -fpermissive src/SDK/amxplugin.cpp -o amxplugin.o
+	
 	# Собираем всё в готовый .dll плагин
 	$(GXX) $(LINK_FLAGS) -o $(OUTFILE) $(OBJECTS)
 	rm -f *.o
